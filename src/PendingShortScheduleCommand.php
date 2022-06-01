@@ -23,6 +23,8 @@ class PendingShortScheduleCommand
 
     protected array $constraints = [];
 
+    protected ?string $cacheDriver = null;
+
     public function everySecond(float $frequencyInSeconds = 1): self
     {
         return $this->everySeconds($frequencyInSeconds);
@@ -120,5 +122,16 @@ class PendingShortScheduleCommand
     public function cacheName(): string
     {
         return 'framework'.DIRECTORY_SEPARATOR.'schedule-'.sha1($this->frequencyInSeconds.$this->command);
+    }
+
+    public function cacheDriver(): ?string
+    {
+        return $this->cacheDriver;
+    }
+
+    public function usingCacheDriver(?string $cacheDriver): self {
+        $this->cacheDriver = $cacheDriver;
+
+        return $this;
     }
 }

@@ -57,16 +57,18 @@ class ShortScheduleCommand extends PendingShortScheduleCommand
 
     protected function processOnOneServer(): void
     {
-        if (Cache::has($this->pendingShortScheduleCommand->cacheName())) {
+        $cache = Cache::store($this->pendingShortScheduleCommand->cacheDriver());
+
+        if ($cache->has($this->pendingShortScheduleCommand->cacheName())) {
             return;
         }
 
-        Cache::add($this->pendingShortScheduleCommand->cacheName(), true, 60);
+        $cache->add($this->pendingShortScheduleCommand->cacheName(), true, 60);
 
         $this->processCommand();
         $this->waitForProcessToFinish();
 
-        Cache::forget($this->pendingShortScheduleCommand->cacheName());
+        $cache->forget($this->pendingShortScheduleCommand->cacheName());
     }
 
     private function processCommand(): void
