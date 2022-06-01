@@ -132,4 +132,25 @@ class ShortScheduleTest extends TestCase
             ->runShortScheduleForSeconds(0.14)
             ->assertTempFileContains('called', 0);
     }
+
+    /** @test **/
+    public function it_can_use_a_custom_cache_driver_to_obtain_a_server_lock()
+    {
+        $cacheDriver = 'array';
+
+        $key = 'framework'.DIRECTORY_SEPARATOR.'schedule-'.sha1('0.05'."echo 'called' >> '{$this->getTempFilePath()}'");
+        Cache::driver($cacheDriver)->add($key, true, 60);
+
+        TestKernel::registerShortScheduleCommand(
+            fn (ShortSchedule $shortSchedule) => $shortSchedule
+                ->exec("echo 'called' >> '{$this->getTempFilePath()}'")
+                ->everySeconds(0.05)
+                ->onOneServer()
+                ->usingCacheDriver($cacheDriver)
+        );
+
+        $this
+            ->runShortScheduleForSeconds(0.14)
+            ->assertTempFileContains('called', 0);
+    }
 }
